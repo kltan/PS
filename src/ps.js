@@ -94,7 +94,7 @@
         this.___instance = instanceNo || "";
         this.___events = [];
         this.___killed = false;
-        this.___name = '';
+        this.___name = "";
     };
 
     P$.destroyAll = function (namespace) {
@@ -191,7 +191,7 @@
                 if (instances[this.___namespace][i] === this) {
                     if (length === 1) {
                         delete instances[this.___namespace];
-                    },
+                    }
                     else if (i === length - 1) {
                         instances[this.___namespace].pop();
                     }
