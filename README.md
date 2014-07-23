@@ -2,13 +2,13 @@
 
 A module-like framework that encapsulates plugins, libraries, and other frameworks. It sets the framework as to how these module interact with each other through a namespaced and powerful global event system. Requires jQuery 1.7+.
 
-# Directions
+## Directions
 
 Include script `<script src="ps.js"></script>`
 
-# Usage
+## Usage
 
-## P$.define(String name, Function constructor)
+### P$.define(String name, Function constructor)
 Module definition for PS
 ```
 // define a module
@@ -18,8 +18,8 @@ P$.define("some widget", function(){
 });
 ```
 
-## P$(String name[, Array arguments]) returns PSinstance
-P$ is the instantiator for modules defined by P$.define
+### P$(String name[, Array arguments]) returns PSinstance
+`P$` is the instantiator for modules defined by `P$.define`
 The event will only trigger on the single instance
 ```
 var widgetP$;
@@ -39,7 +39,7 @@ widgetP$.trigger("some event"); // alerts 1
 widgetP$.trigger("some other event"); // alerts 2
 ```
 
-## P$.global(String name) returns P$instance
+### P$.global(String name) returns P$instance
 Returns a namespaced event listener that can be used globally.
 Can be used as a global function that does not need to return without polluting the global/window namespace
 `PS.global(name)` always return the same PSinstance object for the given name
@@ -51,8 +51,8 @@ P$.global("some global namespace").on("fateful event", function(){});
 P$.global("some global namespace").trigger("fateful event");
 ```
 
-## P$instance.on(String eventName) returns P$instance
-Listens to an event, can be defined in P$.define's constructor or on the P$instance
+### P$instance.on(String eventName) returns P$instance
+Listens to an event, can be defined in `P$.define`'s constructor or on the P$instance
 ```
 // this illustrates modular use
 var widgetP$;
@@ -84,7 +84,7 @@ P$.global("some global namespace").on("fateful event", function(){
 P$.global("some global namespace").trigger("fateful event"); // alerts fateful
 ```
 
-## P$instance.one(String eventName) returns P$instance
+### P$instance.one(String eventName) returns P$instance
 Similar to P$instance.on but event fires only once
 ```
 // this illustrates modular use
@@ -97,8 +97,9 @@ P$.define("widget", function(){
 widgetP$ = P$("widget");
 widgetP$.trigger("event"); // alerts event
 widgetP$.trigger("event"); // do nothing
+```
 
-## P$instance.off(String eventName) returns P$instance
+### P$instance.off(String eventName) returns P$instance
 Stop listening to an event can be used by both module instance and global
 ```
 // this illustrates modular use
@@ -113,8 +114,9 @@ widgetP$.trigger("event"); // alerts event
 widgetP$
     .off("event")
     .trigger("event"); // do nothing
+```
 
-## P$instance.trigger(String eventName[, Array arguments]) returns P$instance
+### P$instance.trigger(String eventName[, Array arguments]) returns P$instance
 Triggers an event, analogous to executing a function i.e. `someFunction(args)`
 ```
 var widgetP$;
