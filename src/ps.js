@@ -127,6 +127,10 @@
         }
         this.___namespace = namespace;
         this.length = $.isArray(instances[this.___namespace]) ? instances[this.___namespace].length : 0;
+        
+        if (this.length) {
+            Array.prototype.push.apply(this, instances[this.___namespace]);
+        }
     };
 
     // index is not used but we cannot help it
