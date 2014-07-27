@@ -30,8 +30,9 @@
     // these are data containers that powers the P$ world
     var instances = {};
     var constructors = {};
+    var ids = {};
 
-    var P$ = function(namespace, args){
+    var P$ = function (namespace, args) {
         var instance;
 
         if (!namespace) {
@@ -56,6 +57,8 @@
             else {
                 constructors[namespace].call(instance);
             }
+
+            // return testable interface, classic module pattern
             return instance;
         }
         else {
@@ -77,9 +80,9 @@
         // if constructor is provided, this is just definition
         if ($.isFunction(construct)) {
             // bad situation, you cannot redefine a module
-            if ($.isFunction(constructors[namespace])) {
-                throw "Module cannot be redefined";
-            }
+//            if ($.isFunction(constructors[namespace])) {
+//                throw "Module cannot be redefined";
+//            }
 
             constructors[namespace] = construct;
         }
@@ -90,11 +93,14 @@
         if (!(this instanceof P$.global)) {
             return new P$.global(namespace, instanceNo);
         }
-        this.___namespace = namespace || "";
-        this.___instance = instanceNo || "";
-        this.___events = [];
-        this.___killed = false;
-        this.___name = "";
+        this.prop = {
+            namespace: namespace || "",
+            instance: instanceNo || "",
+            events: [],
+            killed: false,
+            name: ""
+        };
+
     };
 
     P$.destroyAll = function (namespace) {
@@ -107,7 +113,7 @@
         if (instances[namespace]) {
             if (instances[namespace].length) {
                 for (i = 0; i < instances[namespace].length; i = i + 1) {
-                    instances[namespace][i].___killed = true;
+                    instances[namespace][i].prop.killed = true;
                     // remove all events
                     instances[namespace][i].off("*");
                 }
@@ -125,12 +131,19 @@
         if (!(this instanceof P$.findAll)) {
             return new P$.findAll(namespace);
         }
-        this.___namespace = namespace;
-        this.length = $.isArray(instances[this.___namespace]) ? instances[this.___namespace].length : 0;
-        
-        if (this.length) {
-            Array.prototype.push.apply(this, instances[this.___namespace]);
+        this.prop = {
+            namespace: namespace
+        };
+
+        this.length = 0;
+
+        if ($.isArray(instances[this.prop.namespace])) {
+            Array.prototype.push.apply(this, instances[this.prop.namespace]);
         }
+    };
+
+    P$.findId = function (name) {
+        return ids[name];
     };
 
     // index is not used but we cannot help it
@@ -141,10 +154,10 @@
         P$.global.prototype[key] = function () {
             var that, args, event;
             // making sure pointers that we couldn't de-reference cannot do anything after destroyAll
-            if (this.___killed === false) {
+            if (this.prop.killed === false) {
                 that = this;
                 args = $.makeArray(arguments);
-                event = eventHash(this.___namespace + this.___instance + "_" + args[0]);
+                event = eventHash(this.prop.namespace + this.prop.instance + "_" + args[0]);
 
                 if (key === "on" || key === "one") {
                     // don't define an event without callback
@@ -152,7 +165,7 @@
                         throw "Events '" + args[0] + "' needs a callback";
                     }
                     // keeping track of events for cleaning up
-                    that.___events.push(event);
+                    that.prop.events.push(event);
                     // we don't pass any extra arguments for on and one
                     $jQueryObj[key](event, function () {
                         // jQuery passes the event obj that is useless to us, stripping that out
@@ -161,8 +174,8 @@
                     });
                 }
                 // P$.off("*");
-                else if (key === "off" && args[0] === "*" && this.___events) {
-                    $jQueryObj.off(this.___events.join(" "));
+                else if (key === "off" && args[0] === "*" && this.prop.events) {
+                    $jQueryObj.off(this.prop.events.join(" "));
                 }
                 else {
                     // the arguments structured for $obj.trigger("myevent", [1,2,3]);
@@ -177,32 +190,38 @@
             var args = $.makeArray(arguments);
             var i;
             for (i = 0; i < this.length; i += 1) {
-                instances[this.___namespace][i][key].apply(instances[this.___namespace][i], args);
+                instances[this.prop.namespace][i][key].apply(instances[this.prop.namespace][i], args);
             }
             return this;
         };
     });
 
+    P$.global.prototype.id = function (name) {
+        this.prop.name = name;
+        ids[this.prop.name] = this;
+    };
+
     P$.global.prototype.destroy = function () {
         var i;
-        this.___killed = true;
+        this.prop.killed = true;
         this.off("*");
 
         // those with instance property are modules otherwise global
-        if (this.___instance && instances[this.___namespace]) {
-            for (i = 0; i < instances[this.___namespace].length; i += 1) {
+        if (this.prop.instance && instances[this.prop.namespace]) {
+            for (i = 0; i < instances[this.prop.namespace].length; i += 1) {
                 // found our instance, removing
-                if (instances[this.___namespace][i] === this) {
+                if (instances[this.prop.namespace][i] === this) {
                     if (length === 1) {
-                        delete instances[this.___namespace];
+                        delete instances[this.prop.namespace];
                     }
                     else if (i === length - 1) {
-                        instances[this.___namespace].pop();
+                        instances[this.prop.namespace].pop();
                     }
                     else {
-                        instances[this.___namespace][i] = instances[this.___namespace][length - 1];
-                        instances[this.___namespace].pop();
+                        instances[this.prop.namespace][i] = instances[this.prop.namespace][length - 1];
+                        instances[this.prop.namespace].pop();
                     }
+                    break;
                 }
             }
         }

@@ -58,8 +58,8 @@ describe("P$.global", function () {
 
     it("should populate it's instance number and namespace correctly", function () {
         var instance = P$.global("test", 10);
-        expect(instance.___instance).toBe(10);
-        expect(instance.___namespace).toBe("test");
+        expect(instance.prop.instance).toBe(10);
+        expect(instance.prop.namespace).toBe("test");
     });
 
     it("should have connect on off trigger one", function () {
@@ -114,6 +114,7 @@ describe("P$.findAll", function () {
     var func3;
 
     beforeEach(function () {
+        P$.destroyAll("test");
         func1 = jasmine.createSpy();
         func2 = jasmine.createSpy();
         func3 = jasmine.createSpy();
